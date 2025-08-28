@@ -1,0 +1,14 @@
+﻿
+## Ignore arquivos do Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.log
+*.tmp
+*.bak
+*.swp
+*.pdb
+*.dll
+*.exe
