@@ -81,7 +81,7 @@ public class AtendenteService : IAtendenteInterface
                 // 2. Se não existe, insere
                 var sql = @"
                             INSERT INTO Atendente (Nome, Email)
-                            VALUES (@Nome, @Email);
+                            VALUES (@Nome, @Email, @Inspetoria_Id, @Role);
 
                             SELECT * FROM Atendente WHERE Id = SCOPE_IDENTITY();
                         ";
@@ -105,7 +105,7 @@ public class AtendenteService : IAtendenteInterface
             {
                 var sql = @"
                 UPDATE Atendente
-                SET Nome = @Nome, Email = @Email
+                SET Nome = @Nome, Email = @Email, Inspetoria_Id = @Inspetoria_Id, Role = @Role
                 WHERE Id = @Id;
             ";
 

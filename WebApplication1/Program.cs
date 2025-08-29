@@ -74,8 +74,8 @@ builder.Services.AddCors(options =>
                      "https://irispatrimonio.creaba.org.br"
                  )
                  .AllowAnyHeader()
-                 .AllowAnyMethod()
-                 .AllowCredentials(); // Importante para cookies
+                 .AllowAnyMethod();
+                 //.AllowCredentials(); // Importante para cookies
          });
 });
 
@@ -117,7 +117,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
                 {
                     context.Token = authHeader.Substring("Bearer ".Length).Trim();
-                    logger.LogInformation($"Token extraído: {context.Token?.Substring(0, 20)}...");
+                    logger.LogInformation($"Token extraído: {(context.Token?.Length > 20 ? context.Token.Substring(0, 20) : context.Token)}...");
                 }
 
                 return Task.CompletedTask;
@@ -166,6 +166,10 @@ if (app.Environment.IsDevelopment())
 }
 
 
+// ?? Aqui é o ponto importante:
+// UseRouting precisa vir antes de UseCors
+app.UseRouting();
+
 // ORDEM IMPORTANTE: CORS antes de Authentication/Authorization
 app.UseCors("AllowSpecificOrigins");
 
@@ -173,6 +177,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Habilita resposta para OPTIONS
+app.MapMethods("{*path}", new[] { "OPTIONS" }, () => Results.Ok());
 
 app.Run();
 

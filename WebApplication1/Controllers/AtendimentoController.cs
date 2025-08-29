@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Models;
 using WebApplication1.Services;
 using WebApplication1.Services.Interfaces;
@@ -86,6 +87,7 @@ public class AtendimentoController : ControllerBase
 
     // PATCH: api/atendimento/{id} (atualização parcial)
     [HttpPatch("{id}")]
+    [Authorize]
     public async Task<IActionResult> AtualizarAtendimento(int id, [FromBody] Dictionary<string, object> campos)
     {
         if (campos == null || campos.Count == 0)

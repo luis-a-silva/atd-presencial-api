@@ -8,5 +8,8 @@
 
         public string Email { get; set; }
 
+        public int Inspetoria_Id { get; set; }
+
+        public string Role { get; set; } = "user";
     }
 }

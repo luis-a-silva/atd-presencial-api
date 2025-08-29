@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Models;
 using WebApplication1.Services.Interfaces;
 
+
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AtendenteController : ControllerBase
 {
     private readonly IAtendenteInterface _atendenteService;
