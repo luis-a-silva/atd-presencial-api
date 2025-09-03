@@ -104,6 +104,51 @@ namespace WebApplication1.Services
             return response;
         }
 
+
+        public async Task<ResponseModel<List<AtendimentoDto>>> BuscarAtendimentosPendentesPorInspetoria(int inspetoriaId)
+        {
+            var response = new ResponseModel<List<AtendimentoDto>>();
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                var sql = @"
+                            SELECT 
+                                atd.Id, 
+                                atd.Motivo, 
+                                CAST(atd.Protocolo AS VARCHAR) AS Protocolo,
+                                p.Num_Cadastro_Nacional AS Profissional, 
+                                t.Nome AS Tipo, 
+                                at.Nome AS Atendente,
+                                i.Nome AS Inspetoria, 
+                                atd.Data_Atendimento, 
+                                f.Nota
+                            FROM Atendimento atd
+                            INNER JOIN Profissional p ON atd.Profissional_Id = p.Id
+                            INNER JOIN Tipo t ON p.Tipo_Id = t.Id
+                            INNER JOIN Inspetoria i ON atd.Inspetoria_Id = i.Id
+                            LEFT JOIN Atendente at ON atd.Atendente_Id = at.Id
+                            LEFT JOIN Feedback f ON f.Atendimento_Id = atd.Id
+                            WHERE atd.Atendente_Id IS NULL
+              AND atd.Inspetoria_Id = @InspetoriaId;";
+
+                var queryResult = await connection.QueryAsync<AtendimentoDto>(sql, new { InspetoriaId = inspetoriaId });
+
+                if (!queryResult.Any())
+                {
+                    response.Status = false;
+                    response.Mensagem = "Nenhum atendimento pendente encontrado para essa Inspetoria!";
+                    return response;
+                }
+
+                response.Status = true;
+                response.Mensagem = "Atendimentos pendentes listados com sucesso!";
+                response.Dados = queryResult.ToList();
+            }
+
+            return response;
+        }
+
+
         public async Task<ResponseModel<List<AtendimentoDto>>> BuscarAtendimentosFeedbacks()
         {
             var response = new ResponseModel<List<AtendimentoDto>>();

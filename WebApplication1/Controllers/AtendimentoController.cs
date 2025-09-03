@@ -37,6 +37,20 @@ public class AtendimentoController : ControllerBase
         return Ok(result);
     }
 
+
+    // GET: api/Atendimento/pendentes/{atendenteId}
+    [HttpGet("pendentes/{inspetoriaId}")]
+    public async Task<IActionResult> BuscarPendentesPorInspetoria(int inspetoriaId)
+    {
+        var result = await _atendimentoService.BuscarAtendimentosPendentesPorInspetoria(inspetoriaId);
+
+        if (!result.Status)
+            return NotFound(result);
+
+        return Ok(result);
+    }
+
+
     // 🔹 GET /api/Atendimento/feedbacks
     [HttpGet("feedbacks")]
     public async Task<IActionResult> BuscarAtendimentosFeedbacks()

@@ -13,5 +13,6 @@ namespace WebApplication1.Services.Interfaces
         Task<ResponseModel<List<AtendimentoDto>>> BuscarTodosAtendimentos();
         Task<ResponseModel<List<AtendimentoDto>>> BuscarAtendimentosPendentes();
         Task<ResponseModel<List<AtendimentoDto>>> BuscarAtendimentosFeedbacks();
+        Task<ResponseModel<List<AtendimentoDto>>> BuscarAtendimentosPendentesPorInspetoria(int atendenteId);
     }
 }
