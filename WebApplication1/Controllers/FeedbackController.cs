@@ -15,6 +15,8 @@ public class FeedbackController : ControllerBase
 
     // POST: api/feedback
     [HttpPost]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> ReceberFeedback([FromBody] Feedback feedback)
     {
         if (feedback == null)

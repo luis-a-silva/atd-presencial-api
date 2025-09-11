@@ -33,6 +33,8 @@ public class InspetoriaController : ControllerBase
 
     // POST: api/inspetoria
     [HttpPost]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> CadastrarNovaInspetoria([FromBody] Inspetoria inspetoria)
     {
         if (inspetoria == null)
@@ -45,6 +47,8 @@ public class InspetoriaController : ControllerBase
 
     // PUT: api/inspetoria/{id} (Id na URL, body só com campos a atualizar)
     [HttpPut("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> EditarInspetoria(int id, [FromBody] Inspetoria inspetoria)
     {
         if (inspetoria == null)
@@ -60,6 +64,8 @@ public class InspetoriaController : ControllerBase
 
     // DELETE: api/inspetoria/{id}
     [HttpDelete("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> RemoverInspetoria(int id)
     {
         var result = await _inspetoriaService.RemoverInspetoria(id);

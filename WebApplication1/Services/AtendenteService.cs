@@ -16,14 +16,14 @@ public class AtendenteService : IAtendenteInterface
             _configuration = configuration;
         }
 
-        public async Task<ResponseModel<List<Atendente>>> BuscarAtendentes()
+        public async Task<ResponseModel<List<AtendenteDto>>> BuscarAtendentes()
         {
-            var response = new ResponseModel<List<Atendente>>();
+            var response = new ResponseModel<List<AtendenteDto>>();
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                var sql = "SELECT * FROM Atendente";
-                var result = await connection.QueryAsync<Atendente>(sql);
+                var sql = "SELECT at.Id, at.Nome, at.Email, i.nome as Inspetoria,at.Inspetoria_Id, at.Role from Atendente at INNER JOIN Inspetoria i on Inspetoria_Id = i.Id";
+                var result = await connection.QueryAsync<AtendenteDto>(sql);
 
                 response.Status = result.Any();
                 response.Mensagem = result.Any() ? "Atendentes listados com sucesso!" : "Nenhum atendente encontrado!";
@@ -33,14 +33,16 @@ public class AtendenteService : IAtendenteInterface
             return response;
         }
 
-        public async Task<ResponseModel<Atendente>> BuscarAtendentePorId(int id)
+
+
+        public async Task<ResponseModel<AtendenteDto>> BuscarAtendentePorId(int id)
         {
-            var response = new ResponseModel<Atendente>();
+            var response = new ResponseModel<AtendenteDto>();
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                var sql = "SELECT * FROM Atendente WHERE Id = @Id";
-                var result = await connection.QueryFirstOrDefaultAsync<Atendente>(sql, new { Id = id });
+                var sql = "SELECT at.Id, at.Nome, at.Email, i.nome as Inspetoria,at.Inspetoria_Id, at.Role from Atendente at INNER JOIN Inspetoria i on Inspetoria_Id = i.Id";
+                var result = await connection.QueryFirstOrDefaultAsync<AtendenteDto>(sql, new { Id = id });
 
                 if (result == null)
                 {
@@ -57,36 +59,35 @@ public class AtendenteService : IAtendenteInterface
             return response;
         }
 
-        public async Task<ResponseModel<List<Atendente>>> CriarNovoAtendente(Atendente atendente)
+        public async Task<ResponseModel<List<AtendenteDto>>> CriarNovoAtendente(Atendente atendente)
         {
-            var response = new ResponseModel<List<Atendente>>();
+            var response = new ResponseModel<List<AtendenteDto>>();
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 await connection.OpenAsync();
 
                 // 1. Verificar se já existe pelo email
-                var atendenteExistente = await connection.QueryFirstOrDefaultAsync<Atendente>(
-                    "SELECT * FROM Atendente WHERE Email = @Email",
+                var atendenteExistente = await connection.QueryFirstOrDefaultAsync<AtendenteDto>(
+                    "SELECT at.Id, at.Nome, at.Email, i.nome as Inspetoria,at.Inspetoria_Id, at.Role from Atendente at LEFT JOIN Inspetoria i on Inspetoria_Id = i.Id WHERE Email = @Email",
                     new { atendente.Email });
 
                 if (atendenteExistente != null)
                 {
                     response.Status = true;
                     response.Mensagem = "Atendente já existente!";
-                    response.Dados = new List<Atendente> { atendenteExistente };
+                    response.Dados = new List<AtendenteDto> { atendenteExistente };
                     return response;
                 }
 
                 // 2. Se não existe, insere
                 var sql = @"
-                            INSERT INTO Atendente (Nome, Email)
+                            INSERT INTO Atendente (Nome, Email, Inspetoria_id, Role)
                             VALUES (@Nome, @Email, @Inspetoria_Id, @Role);
-
                             SELECT * FROM Atendente WHERE Id = SCOPE_IDENTITY();
                         ";
 
-                var result = await connection.QueryAsync<Atendente>(sql, atendente);
+                var result = await connection.QueryAsync<AtendenteDto>(sql, atendente);
 
                 response.Status = true;
                 response.Mensagem = "Atendente cadastrado com sucesso!";

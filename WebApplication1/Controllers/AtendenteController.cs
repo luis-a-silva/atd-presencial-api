@@ -49,6 +49,8 @@ public class AtendenteController : ControllerBase
 
     // PUT: api/atendente/{id} (Id na URL, body só com campos a atualizar)
     [HttpPut("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> EditarAtendente(int id, [FromBody] Atendente atendente)
     {
         if (atendente == null)
@@ -75,6 +77,8 @@ public class AtendenteController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> RemoverAtendente(int id)
     {
         var result = await _atendenteService.RemoverAtendente(id);

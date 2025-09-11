@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 using WebApplication1.Services;
 using WebApplication1.Services.Interfaces;
@@ -14,6 +16,35 @@ public class AtendimentoController : ControllerBase
     {
         _atendimentoService = atendimentoService;
     }
+
+    private async Task<bool> ValidarRecaptchaAsync(string token)
+    {
+        var secret = "6Ld9g8YrAAAAAI0H8C4aIhC-H_V4kn57kJAJLxuU"; // ⚠️ Substitua pela sua chave secreta do Google
+        using var client = new HttpClient();
+
+        var response = await client.PostAsync(
+            $"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={token}",
+            null
+        );
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        var success = root.GetProperty("success").GetBoolean();
+
+        // opcional: também validar score
+        if (root.TryGetProperty("score", out var scoreElement))
+        {
+            var score = scoreElement.GetDouble();
+            if (score < 0.5) return false; // rejeita se score < 0.5
+        }
+
+        return success;
+    }
+
+
 
     // 🔹 GET /api/Atendimento/todos
     [HttpGet("todos")]
@@ -53,6 +84,8 @@ public class AtendimentoController : ControllerBase
 
     // 🔹 GET /api/Atendimento/feedbacks
     [HttpGet("feedbacks")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> BuscarAtendimentosFeedbacks()
     {
         var result = await _atendimentoService.BuscarAtendimentosFeedbacks();
@@ -63,6 +96,8 @@ public class AtendimentoController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> BuscarAtendimentoPorId(int id)
     {
         var result = await _atendimentoService.BuscarAtendimentoPorId(id);
@@ -71,22 +106,42 @@ public class AtendimentoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CadastrarNovoAtendimento([FromBody] Atendimento atendimento)
+    public async Task<IActionResult> CadastrarNovoAtendimento([FromBody] AtendimentoCaptchaDto atendimentoDto)
     {
-        if (atendimento == null)
+        if (atendimentoDto == null)
             return BadRequest(new { Status = false, Mensagem = "Atendimento inválido!" });
 
-        // Adicione esta validação
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        if (string.IsNullOrEmpty(atendimentoDto.RecaptchaToken))
+            return BadRequest(new { Status = false, Mensagem = "Token reCAPTCHA ausente!" });
+
+        // 🔹 Valida token com Google
+        var valido = await ValidarRecaptchaAsync(atendimentoDto.RecaptchaToken);
+        if (!valido)
+            return Unauthorized(new { Status = false, Mensagem = "Falha na verificação reCAPTCHA!" });
+
+        // 🔹 Mapeia DTO -> Model
+        var atendimento = new Atendimento
+        {
+            Id = atendimentoDto.Id,
+            Motivo = atendimentoDto.Motivo,
+            Protocolo = atendimentoDto.Protocolo,
+            Data_Atendimento = atendimentoDto.Data_Atendimento,
+            Inspetoria_Id = atendimentoDto.Inspetoria_Id,
+            Atendente_Id = atendimentoDto.Atendente_Id,
+            Profissional_Id = atendimentoDto.Profissional_Id
+        };
 
         var result = await _atendimentoService.CadastrarNovoAtendimento(atendimento);
         if (!result.Status) return BadRequest(result);
+
         return Ok(result);
     }
 
+
     // PUT: api/atendimento/{id} (Id na URL, body com objeto completo)
     [HttpPut("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> EditarAtendimento(int id, [FromBody] Atendimento atendimento)
     {
         if (atendimento == null)
@@ -113,6 +168,8 @@ public class AtendimentoController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [NonAction]
+    [Obsolete("Esse endpoint não foi implementado.")]
     public async Task<IActionResult> RemoverAtendimento(int id)
     {
         var result = await _atendimentoService.RemoverAtendimento(id);
