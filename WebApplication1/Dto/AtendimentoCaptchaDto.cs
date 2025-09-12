@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace WebApplication1.Dto
 {
-    public class AtendimentoCaptchaDto
+    public sealed class AtendimentoCaptchaDto
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }

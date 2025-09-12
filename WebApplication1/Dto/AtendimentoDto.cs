@@ -2,7 +2,7 @@
 
 namespace WebApplication1.Dto
 {
-    public class AtendimentoDto
+    public sealed class AtendimentoDto
     {
     [JsonPropertyName("id")]
         public int Id { get; set; }

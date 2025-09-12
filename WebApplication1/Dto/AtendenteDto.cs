@@ -1,6 +1,6 @@
 ﻿namespace WebApplication1.Models
 {
-    public class AtendenteDto
+    public sealed class   AtendenteDto
     {
         public int Id {  get; set; }
         

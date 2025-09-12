@@ -54,6 +54,7 @@ builder.Services.AddScoped<IAtendimentoInterface, AtendimentoService>();
 builder.Services.AddScoped<IFeedbackInterface, FeedbackService>();
 builder.Services.AddScoped<IInspetoriaInterface, InspetoriaService>();
 builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
+builder.Services.AddScoped<IDashboardInterface, DashboardService>();
 
 
 //Program como parametro diz respeito a toda a aplicação
