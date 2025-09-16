@@ -66,13 +66,7 @@ builder.Services.AddCors(options =>
          {
              policyBuilder
                  .WithOrigins(
-                     "http://localhost:3000",
-                     "http://localhost:5173",
-                     "http://localhost:5500",
-                     "http://localhost:5501",
-                     "https://localhost:3000",
-                     "https://localhost:5173",
-                     "https://irispatrimonio.creaba.org.br"
+                     "https://irisatendimento.creaba.org.br"
                  )
                  .AllowAnyHeader()
                  .AllowAnyMethod();
@@ -145,19 +139,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
+
 // Adicionar autorização
 builder.Services.AddAuthorization();
 
 // Adicionar logging
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-
+//
 
 var app = builder.Build();
 
 // Configurar o pipeline
-
-
 
 
 if (app.Environment.IsDevelopment())
@@ -184,55 +178,3 @@ app.MapMethods("{*path}", new[] { "OPTIONS" }, () => Results.Ok());
 
 app.Run();
 
-
-/* NÃO APAGAR
-using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using WebApplication1.Services;
-using WebApplication1.Services.Interfaces;
-
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IAtendimentoInterface, AtendimentoService>();
-builder.Services.AddScoped<IAtendenteInterface, AtendenteService>();
-builder.Services.AddScoped<IAtendimentoInterface, AtendimentoService>();
-builder.Services.AddScoped<IFeedbackInterface, FeedbackService>();
-builder.Services.AddScoped<IInspetoriaInterface, InspetoriaService>();
-builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
-
-//Program como parametro diz respeito a toda a aplicação
-builder.Services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-app.UseCors("AllowAll");
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
-*/
