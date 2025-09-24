@@ -13,60 +13,25 @@ namespace WebApplication1.Controllers
             _dashboardService = dashboardService;
         }
 
-        // 🔹 GET /api/Dashboard/total
         [HttpGet("total")]
-        public async Task<IActionResult> Total()
-        {
-            var result = await _dashboardService.TotalAsync();
+        public async Task<IActionResult> Total([FromQuery] int? inspetoriaId)
+            => Ok(await _dashboardService.TotalAsync(inspetoriaId));
 
-            if (!result.Status) return NotFound(result);
-
-            return Ok(result);
-        }
-
-        // 🔹 GET /api/Dashboard/por-inspetoria
         [HttpGet("por-inspetoria")]
-        public async Task<IActionResult> PorInspetoria()
-        {
-            var result = await _dashboardService.PorInspetoriaAsync();
+        public async Task<IActionResult> PorInspetoria([FromQuery] int? inspetoriaId)
+            => Ok(await _dashboardService.PorInspetoriaAsync(inspetoriaId));
 
-            if (!result.Status) return NotFound(result);
-
-            return Ok(result);
-        }
-
-        // 🔹 GET /api/Dashboard/por-motivo
         [HttpGet("por-motivo")]
-        public async Task<IActionResult> PorMotivo()
-        {
-            var result = await _dashboardService.PorMotivoAsync();
+        public async Task<IActionResult> PorMotivo([FromQuery] int? inspetoriaId)
+            => Ok(await _dashboardService.PorMotivoAsync(inspetoriaId));
 
-            if (!result.Status) return NotFound(result);
-
-            return Ok(result);
-        }
-
-        // 🔹 GET /api/Dashboard/por-tipo
         [HttpGet("por-tipo")]
-        public async Task<IActionResult> PorTipo()
-        {
-            var result = await _dashboardService.PorTipoAsync();
+        public async Task<IActionResult> PorTipo([FromQuery] int? inspetoriaId)
+            => Ok(await _dashboardService.PorTipoAsync(inspetoriaId));
 
-            if (!result.Status) return NotFound(result);
-
-            return Ok(result);
-        }
-
-        // 🔹 GET /api/Dashboard/serie-mensal?anoInicio=2024&anoFim=2025
         [HttpGet("serie-mensal")]
-        public async Task<IActionResult> SerieMensal([FromQuery] int anoInicio, [FromQuery] int anoFim)
-        {
-            var result = await _dashboardService.SerieMensalAsync(anoInicio, anoFim);
-
-            if (!result.Status) return NotFound(result);
-
-            return Ok(result);
-        }
+        public async Task<IActionResult> SerieMensal([FromQuery] int anoInicio, [FromQuery] int anoFim, [FromQuery] int? inspetoriaId)
+            => Ok(await _dashboardService.SerieMensalAsync(anoInicio, anoFim, inspetoriaId));
     }
-}
 
+}

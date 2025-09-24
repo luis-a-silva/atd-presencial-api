@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using WebApplication1.Dto;
 using WebApplication1.Models;
-using WebApplication1.Services;
 using WebApplication1.Services.Interfaces;
 
 [ApiController]
@@ -125,16 +124,41 @@ public class AtendimentoController : ControllerBase
             Id = atendimentoDto.Id,
             Motivo = atendimentoDto.Motivo,
             Protocolo = atendimentoDto.Protocolo,
+            Data_Entrada = atendimentoDto.Data_Entrada,
+            Data_Inicial = atendimentoDto.Data_Inicial,
             Data_Atendimento = atendimentoDto.Data_Atendimento,
             Inspetoria_Id = atendimentoDto.Inspetoria_Id,
             Atendente_Id = atendimentoDto.Atendente_Id,
             Profissional_Id = atendimentoDto.Profissional_Id
         };
-
+        /*
         var result = await _atendimentoService.CadastrarNovoAtendimento(atendimento);
         if (!result.Status) return BadRequest(result);
 
-        return Ok(result);
+        return Ok(result);*/
+
+
+        try
+        {
+            var result = await _atendimentoService.CadastrarNovoAtendimento(atendimento);
+
+            return Ok(new
+            {
+                sucesso = result.Status,
+                mensagem = result.Mensagem,
+                dados = result.Dados
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                sucesso = false,
+                mensagem = "Erro interno ao cadastrar atendimento",
+                detalhe = ex.Message
+            });
+        }
+
     }
 
 

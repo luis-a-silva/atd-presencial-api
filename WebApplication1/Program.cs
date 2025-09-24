@@ -66,7 +66,8 @@ builder.Services.AddCors(options =>
          {
              policyBuilder
                  .WithOrigins(
-                     "https://irisatendimento.creaba.org.br"
+                     "https://irisatendimento.creaba.org.br",
+                     "http://localhost:5500"
                  )
                  .AllowAnyHeader()
                  .AllowAnyMethod();

@@ -25,8 +25,14 @@ namespace WebApplication1.Dto
         [JsonPropertyName("inspetoria")]
         public string Inspetoria { get; set; }
 
+        [JsonPropertyName("data_entrada")]
+        public DateTime Data_Entrada { get; set; }
+
+        [JsonPropertyName("data_inicial")]
+        public DateTime? Data_Inicial { get; set; }
+
         [JsonPropertyName("data_atendimento")]
-        public DateTime Data_Atendimento { get; set; }
+        public DateTime? Data_Atendimento { get; set; }
 
         [JsonPropertyName("nota")]
         public int? Nota { get; set; }

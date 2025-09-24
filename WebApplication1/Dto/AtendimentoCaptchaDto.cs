@@ -11,11 +11,20 @@ namespace WebApplication1.Dto
         [JsonPropertyName("motivo")]
         public string Motivo { get; set; }
 
+        [JsonPropertyName("preferencial")]
+        public bool Preferencial { get; set; }
+
         [JsonPropertyName("protocolo")]
         public string Protocolo { get; set; }
 
+        [JsonPropertyName("data_entrada")]
+        public DateTime Data_Entrada{ get; set; }
+
+        [JsonPropertyName("data_inicial")]
+        public DateTime? Data_Inicial{ get; set; }
+
         [JsonPropertyName("data_atendimento")]
-        public DateTime Data_Atendimento { get; set; }
+        public DateTime? Data_Atendimento { get; set; }
 
         [JsonPropertyName("inspetoria_id")]
         public int Inspetoria_Id { get; set; }

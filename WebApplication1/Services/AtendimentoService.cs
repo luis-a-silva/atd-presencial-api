@@ -34,7 +34,9 @@ namespace WebApplication1.Services
                 p.Num_Cadastro_Nacional AS Profissional, 
                 t.Nome AS Tipo, 
                 at.Nome AS Atendente,
-                i.Nome AS Inspetoria, 
+                i.Nome AS Inspetoria,
+                atd.Data_Entrada,
+                atd.Data_Inicial,
                 atd.Data_Atendimento, 
                 f.Nota
             FROM Atendimento atd
@@ -77,6 +79,8 @@ namespace WebApplication1.Services
                 t.Nome AS Tipo, 
                 at.Nome AS Atendente,
                 i.Nome AS Inspetoria, 
+                atd.Data_Entrada,
+                atd.Data_Inicial, 
                 atd.Data_Atendimento, 
                 f.Nota
             FROM Atendimento atd
@@ -114,12 +118,15 @@ namespace WebApplication1.Services
                 var sql = @"
                             SELECT 
                                 atd.Id, 
+                                atd.Preferencial,
                                 atd.Motivo, 
                                 CAST(atd.Protocolo AS VARCHAR) AS Protocolo,
                                 p.Num_Cadastro_Nacional AS Profissional, 
                                 t.Nome AS Tipo, 
                                 at.Nome AS Atendente,
                                 i.Nome AS Inspetoria, 
+                                atd.Data_Entrada, 
+                                atd.Data_Inicial, 
                                 atd.Data_Atendimento, 
                                 f.Nota
                             FROM Atendimento atd
@@ -158,6 +165,7 @@ namespace WebApplication1.Services
                 var sql = @"
                 SELECT 
                     atd.Id, 
+                    atd.Preferencial,
                     atd.Motivo, 
                     CAST(atd.Protocolo AS VARCHAR) AS Protocolo,
                     p.Num_Cadastro_Nacional AS Profissional, 
@@ -200,6 +208,7 @@ namespace WebApplication1.Services
                 var sql = @"
                     SELECT 
                         atd.Id, 
+                        atd.Preferencial,
                         atd.Motivo, 
                         atd.Protocolo, 
                         p.Num_Cadastro_Nacional AS Profissional, 
@@ -241,8 +250,8 @@ namespace WebApplication1.Services
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 var sql = @"
-                    INSERT INTO Atendimento (Motivo, Protocolo, Data_Atendimento, Inspetoria_Id, Atendente_Id, Profissional_Id)
-                    VALUES (@Motivo, @Protocolo, @Data_Atendimento, @Inspetoria_Id, @Atendente_Id, @Profissional_Id);
+                    INSERT INTO Atendimento (Preferencial, Motivo, Protocolo, Data_Entrada, Data_Atendimento, Data_Inicial, Inspetoria_Id, Atendente_Id, Profissional_Id)
+                    VALUES (@Preferencial, @Motivo, @Protocolo, @Data_Entrada, @Data_Atendimento, @Data_Inicial, @Inspetoria_Id, @Atendente_Id, @Profissional_Id);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 var novoId = await connection.ExecuteScalarAsync<int>(sql, atendimento);
@@ -276,7 +285,9 @@ namespace WebApplication1.Services
                     UPDATE Atendimento 
                     SET Motivo = @Motivo, 
                         Protocolo = @Protocolo, 
+                        Data_Entrada = @Data_Entrada,
                         Data_Atendimento = @Data_Atendimento,
+                        Data_Inicial = @Data_Inicial,
                         Inspetoria_Id = @Inspetoria_Id, 
                         Atendente_Id = @Atendente_Id, 
                         Profissional_Id = @Profissional_Id

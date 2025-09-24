@@ -6,84 +6,107 @@ using WebApplication1.Models; // onde está o ResponseModel
 
 namespace WebApplication1.Services
 {
-        public class DashboardService : IDashboardInterface
+    public class DashboardService : IDashboardInterface
+    {
+        private readonly IConfiguration _configuration;
+
+        public DashboardService(IConfiguration configuration)
         {
-            private readonly IConfiguration _configuration;
+            _configuration = configuration;
+        }
 
-            public DashboardService(IConfiguration configuration)
+        public async Task<ResponseModel<TotalAtendimentosDto>> TotalAsync(int? inspetoriaId = null)
+        {
+            var response = new ResponseModel<TotalAtendimentosDto>();
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                _configuration = configuration;
-            }
+                var sql = @"
+                            SELECT COUNT(1) AS Total_Atendimentos
+                            FROM Atendimento a
+                            /**where**/;";
 
-            // 1. Total de atendimentos
-            public async Task<ResponseModel<TotalAtendimentosDto>> TotalAsync()
-            {
-                var response = new ResponseModel<TotalAtendimentosDto>();
+                var builder = new SqlBuilder();
+                var template = builder.AddTemplate(sql);
 
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                if (inspetoriaId.HasValue)
+                    builder.Where("a.Inspetoria_Id = @inspetoriaId", new { inspetoriaId });
+
+                var queryResult = await connection.QuerySingleOrDefaultAsync<TotalAtendimentosDto>(template.RawSql, template.Parameters);
+
+                if (queryResult == null)
                 {
-                    const string sql = @"SELECT COUNT(1) AS Total_Atendimentos FROM Atendimento;";
-                    var queryResult = await connection.QuerySingleOrDefaultAsync<TotalAtendimentosDto>(sql);
-
-                    if (queryResult == null)
-                    {
-                        response.Status = false;
-                        response.Mensagem = "Nenhum dado encontrado!";
-                        return response;
-                    }
-
-                    response.Status = true;
-                    response.Mensagem = "Total de atendimentos listado com sucesso!";
-                    response.Dados = queryResult;
+                    response.Status = false;
+                    response.Mensagem = "Nenhum dado encontrado!";
+                    return response;
                 }
 
-                return response;
+                response.Status = true;
+                response.Mensagem = "Total de atendimentos listado com sucesso!";
+                response.Dados = queryResult;
             }
 
-            // 2. Atendimentos por Inspetoria
-            public async Task<ResponseModel<List<AtendimentosPorInspetoriaDto>>> PorInspetoriaAsync()
+            return response;
+        }
+
+        // 2. Atendimentos por Inspetoria
+        public async Task<ResponseModel<List<AtendimentosPorInspetoriaDto>>> PorInspetoriaAsync(int? inspetoriaId = null)
+        {
+            var response = new ResponseModel<List<AtendimentosPorInspetoriaDto>>();
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                var response = new ResponseModel<List<AtendimentosPorInspetoriaDto>>();
+                var sql = @"
+                            SELECT i.Nome AS Inspetoria_Nome, COUNT(a.Id) AS Total_Atendimentos
+                            FROM Atendimento a
+                            JOIN Inspetoria i ON i.Id = a.Inspetoria_Id
+                            /**where**/
+                            GROUP BY i.Nome
+                            ORDER BY i.Nome;";
 
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                var builder = new SqlBuilder();
+                var template = builder.AddTemplate(sql);
+
+                if (inspetoriaId.HasValue)
+                    builder.Where("a.Inspetoria_Id = @inspetoriaId", new { inspetoriaId });
+
+                var queryResult = await connection.QueryAsync<AtendimentosPorInspetoriaDto>(template.RawSql, template.Parameters);
+
+                if (!queryResult.Any())
                 {
-                    const string sql = @"
-                    SELECT i.Nome AS Inspetoria_Nome, COUNT(a.Id) AS Total_Atendimentos
-                    FROM Atendimento a
-                    JOIN Inspetoria i ON i.Id = a.Inspetoria_Id
-                    GROUP BY i.Nome
-                    ORDER BY i.Nome;";
-
-                    var queryResult = await connection.QueryAsync<AtendimentosPorInspetoriaDto>(sql);
-
-                    if (!queryResult.Any())
-                    {
-                        response.Status = false;
-                        response.Mensagem = "Nenhum atendimento encontrado por Inspetoria!";
-                        return response;
-                    }
-
-                    response.Status = true;
-                    response.Mensagem = "Atendimentos por Inspetoria listados com sucesso!";
-                    response.Dados = queryResult.ToList();
+                    response.Status = false;
+                    response.Mensagem = "Nenhum atendimento encontrado por Inspetoria!";
+                    return response;
                 }
 
-                return response;
+                response.Status = true;
+                response.Mensagem = "Atendimentos por Inspetoria listados com sucesso!";
+                response.Dados = queryResult.ToList();
             }
+
+            return response;
+        }
 
         // 3. Atendimentos por Motivo
-        public async Task<ResponseModel<List<AtendimentosPorMotivoDto>>> PorMotivoAsync()
+        public async Task<ResponseModel<List<AtendimentosPorMotivoDto>>> PorMotivoAsync(int? inspetoriaId = null)
         {
             var response = new ResponseModel<List<AtendimentosPorMotivoDto>>();
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                const string sql = @"
-            SELECT a.Motivo AS Motivo, COUNT(*) AS Total_Atendimentos
-            FROM Atendimento a
-            GROUP BY a.Motivo;";
+                var sql = @"
+                        SELECT a.Motivo, COUNT(*) AS Total_Atendimentos
+                        FROM Atendimento a
+                        /**where**/
+                        GROUP BY a.Motivo;";
 
-                var queryResult = await connection.QueryAsync<AtendimentosPorMotivoDto>(sql);
+                var builder = new SqlBuilder();
+                var template = builder.AddTemplate(sql);
+
+                if (inspetoriaId.HasValue)
+                    builder.Where("a.Inspetoria_Id = @inspetoriaId", new { inspetoriaId });
+
+                var queryResult = await connection.QueryAsync<AtendimentosPorMotivoDto>(template.RawSql, template.Parameters);
 
                 if (!queryResult.Any())
                 {
@@ -92,9 +115,8 @@ namespace WebApplication1.Services
                     return response;
                 }
 
-                // 🔹 Processar motivos separados por ";"
+                // Processamento dos motivos separados
                 var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
                 foreach (var row in queryResult)
                 {
                     if (string.IsNullOrWhiteSpace(row.Motivo)) continue;
@@ -112,94 +134,102 @@ namespace WebApplication1.Services
 
                 response.Status = true;
                 response.Mensagem = "Atendimentos por Motivo listados com sucesso!";
-                response.Dados = dict
-                    .Select(x => new AtendimentosPorMotivoDto
-                    {
-                        Motivo = x.Key,
-                        Total_Atendimentos = x.Value
-                    })
-                    .OrderByDescending(x => x.Total_Atendimentos)
-                    .ToList();
+                response.Dados = dict.Select(x => new AtendimentosPorMotivoDto
+                {
+                    Motivo = x.Key,
+                    Total_Atendimentos = x.Value
+                }).OrderByDescending(x => x.Total_Atendimentos).ToList();
             }
 
             return response;
         }
 
+        // 4. Atendimentos por Tipo (CPF/CNPJ)
+        public async Task<ResponseModel<List<AtendimentosPorTipoDto>>> PorTipoAsync(int? inspetoriaId = null)
+        {
+            var response = new ResponseModel<List<AtendimentosPorTipoDto>>();
 
-        // 4. Atendimentos por Tipo (CNPJ/CPF)
-        public async Task<ResponseModel<List<AtendimentosPorTipoDto>>> PorTipoAsync()
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                var response = new ResponseModel<List<AtendimentosPorTipoDto>>();
+                var sql = @"
+                            WITH tipos AS (SELECT 1 AS tipo_id UNION ALL SELECT 2),
+                            contagem AS (
+                                SELECT p.tipo_id, COUNT(a.id) AS total
+                                FROM Atendimento a
+                                JOIN Profissional p ON p.id = a.profissional_id
+                                /**where**/
+                                GROUP BY p.tipo_id
+                            )
+                            SELECT t.tipo_id AS Tipo_Profissional,
+                                   COALESCE(c.total, 0) AS Total_Atendimentos
+                            FROM tipos t
+                            LEFT JOIN contagem c ON c.tipo_id = t.tipo_id
+                            ORDER BY t.tipo_id;";
 
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                var builder = new SqlBuilder();
+                var template = builder.AddTemplate(sql);
+
+                if (inspetoriaId.HasValue)
+                    builder.Where("a.Inspetoria_Id = @inspetoriaId", new { inspetoriaId });
+
+                var queryResult = await connection.QueryAsync<AtendimentosPorTipoDto>(template.RawSql, template.Parameters);
+
+                if (!queryResult.Any())
                 {
-                    const string sql = @"
-                    WITH tipos AS (
-                        SELECT 1 AS tipo_id UNION ALL
-                        SELECT 2
-                    ),
-                    contagem AS (
-                        SELECT p.tipo_id, COUNT(a.id) AS total
-                        FROM Atendimento a
-                        JOIN Profissional p ON p.id = a.profissional_id
-                        GROUP BY p.tipo_id
-                    )
-                    SELECT t.tipo_id AS Tipo_Profissional,
-                           COALESCE(c.total, 0) AS Total_Atendimentos
-                    FROM tipos t
-                    LEFT JOIN contagem c ON c.tipo_id = t.tipo_id
-                    ORDER BY t.tipo_id;";
-
-                    var queryResult = await connection.QueryAsync<AtendimentosPorTipoDto>(sql);
-
-                    if (!queryResult.Any())
-                    {
-                        response.Status = false;
-                        response.Mensagem = "Nenhum atendimento encontrado por Tipo!";
-                        return response;
-                    }
-
-                    response.Status = true;
-                    response.Mensagem = "Atendimentos por Tipo listados com sucesso!";
-                    response.Dados = queryResult.ToList();
+                    response.Status = false;
+                    response.Mensagem = "Nenhum atendimento encontrado por Tipo!";
+                    return response;
                 }
 
-                return response;
+                response.Status = true;
+                response.Mensagem = "Atendimentos por Tipo listados com sucesso!";
+                response.Dados = queryResult.ToList();
             }
 
-            // 5. Série Mensal
-            public async Task<ResponseModel<List<SerieMensalDto>>> SerieMensalAsync(int anoInicio, int anoFim)
-            {
-                var response = new ResponseModel<List<SerieMensalDto>>();
-
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
-                {
-                    const string sql = @"
-                    SELECT YEAR(a.Data_Atendimento) AS Ano,
-                           MONTH(a.Data_Atendimento) AS Mes,
-                           COUNT(*) AS Total_Atendimentos
-                    FROM Atendimento a
-                    WHERE YEAR(a.Data_Atendimento) BETWEEN @anoInicio AND @anoFim
-                    GROUP BY YEAR(a.Data_Atendimento), MONTH(a.Data_Atendimento)
-                    ORDER BY Ano, Mes;";
-
-                    var queryResult = await connection.QueryAsync<SerieMensalDto>(sql, new { anoInicio, anoFim });
-
-                    if (!queryResult.Any())
-                    {
-                        response.Status = false;
-                        response.Mensagem = "Nenhum atendimento encontrado para a série mensal!";
-                        return response;
-                    }
-
-                    response.Status = true;
-                    response.Mensagem = "Série mensal de atendimentos listada com sucesso!";
-                    response.Dados = queryResult.ToList();
-                }
-
-                return response;
-            }
+            return response;
         }
-}
 
+        // 5. Série Mensal
+        public async Task<ResponseModel<List<SerieMensalDto>>> SerieMensalAsync(int anoInicio, int anoFim, int? inspetoriaId = null)
+        {
+            var response = new ResponseModel<List<SerieMensalDto>>();
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                var sql = @"
+                            SELECT YEAR(a.Data_Atendimento) AS Ano,
+                                   MONTH(a.Data_Atendimento) AS Mes,
+                                   COUNT(*) AS Total_Atendimentos
+                            FROM Atendimento a
+                            /**where**/
+                            AND YEAR(a.Data_Atendimento) BETWEEN @anoInicio AND @anoFim
+                            GROUP BY YEAR(a.Data_Atendimento), MONTH(a.Data_Atendimento)
+                            ORDER BY Ano, Mes;";
+
+                var builder = new SqlBuilder();
+                builder.Where("1=1"); // base
+                if (inspetoriaId.HasValue)
+                    builder.Where("a.Inspetoria_Id = @inspetoriaId", new { inspetoriaId });
+
+                var template = builder.AddTemplate(sql, new { anoInicio, anoFim });
+
+                var queryResult = await connection.QueryAsync<SerieMensalDto>(template.RawSql, template.Parameters);
+
+                if (!queryResult.Any())
+                {
+                    response.Status = false;
+                    response.Mensagem = "Nenhum atendimento encontrado para a série mensal!";
+                    return response;
+                }
+
+                response.Status = true;
+                response.Mensagem = "Série mensal listada com sucesso!";
+                response.Dados = queryResult.ToList();
+            }
+
+            return response;
+        }
+
+    }
+}
 
