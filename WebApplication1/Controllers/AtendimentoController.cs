@@ -122,6 +122,7 @@ public class AtendimentoController : ControllerBase
         var atendimento = new Atendimento
         {
             Id = atendimentoDto.Id,
+            Preferencial = atendimentoDto.Preferencial,
             Motivo = atendimentoDto.Motivo,
             Protocolo = atendimentoDto.Protocolo,
             Data_Entrada = atendimentoDto.Data_Entrada,

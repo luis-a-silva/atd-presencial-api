@@ -10,6 +10,9 @@ namespace WebApplication1.Dto
         [JsonPropertyName("motivo")]
         public string Motivo { get; set; }
 
+        [JsonPropertyName("preferencial")]
+        public bool Preferencial { get; set; }
+
         [JsonPropertyName("protocolo")]
         public string Protocolo { get; set; }
 

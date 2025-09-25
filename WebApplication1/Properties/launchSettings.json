@@ -24,8 +24,8 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7050;http://localhost:5033",
-      //"applicationUrl": "https://irisatendimento.creaba.org.br",
+      //"applicationUrl": "https://localhost:7050;http://localhost:5033",
+      "applicationUrl": "https://irisatendimento.creaba.org.br",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

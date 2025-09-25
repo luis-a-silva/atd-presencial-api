@@ -82,14 +82,15 @@ namespace WebApplication1.Services
                 atd.Data_Entrada,
                 atd.Data_Inicial, 
                 atd.Data_Atendimento, 
+                atd.Preferencial,
                 f.Nota
-            FROM Atendimento atd
-            INNER JOIN Profissional p ON atd.Profissional_Id = p.Id
-            INNER JOIN Tipo t ON p.Tipo_Id = t.Id
-            INNER JOIN Inspetoria i ON atd.Inspetoria_Id = i.Id
-            LEFT JOIN Atendente at ON atd.Atendente_Id = at.Id
-            LEFT JOIN Feedback f ON f.Atendimento_Id = atd.Id
-            WHERE atd.Atendente_Id IS NULL;";
+                    FROM Atendimento atd
+                    INNER JOIN Profissional p ON atd.Profissional_Id = p.Id
+                    INNER JOIN Tipo t ON p.Tipo_Id = t.Id
+                    INNER JOIN Inspetoria i ON atd.Inspetoria_Id = i.Id
+                    LEFT JOIN Atendente at ON atd.Atendente_Id = at.Id
+                    LEFT JOIN Feedback f ON f.Atendimento_Id = atd.Id
+                    WHERE atd.Atendente_Id IS NULL;";
 
                 var queryResult = await connection.QueryAsync<AtendimentoDto>(sql);
 
@@ -117,8 +118,7 @@ namespace WebApplication1.Services
             {
                 var sql = @"
                             SELECT 
-                                atd.Id, 
-                                atd.Preferencial,
+                                atd.Id,
                                 atd.Motivo, 
                                 CAST(atd.Protocolo AS VARCHAR) AS Protocolo,
                                 p.Num_Cadastro_Nacional AS Profissional, 
@@ -128,6 +128,7 @@ namespace WebApplication1.Services
                                 atd.Data_Entrada, 
                                 atd.Data_Inicial, 
                                 atd.Data_Atendimento, 
+                                atd.Preferencial,
                                 f.Nota
                             FROM Atendimento atd
                             INNER JOIN Profissional p ON atd.Profissional_Id = p.Id
